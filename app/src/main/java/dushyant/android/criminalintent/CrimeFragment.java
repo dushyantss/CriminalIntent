@@ -1,6 +1,8 @@
 package dushyant.android.criminalintent;
 
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import java.util.List;
 import java.util.UUID;
 
 import dushyant.android.criminalintent.models.Crime;
@@ -27,6 +30,9 @@ import dushyant.android.criminalintent.models.CrimeLab;
 public class CrimeFragment extends Fragment {
 
     private static final String ARG_CRIME_ID = "crime_id";
+    private static final String RESULT_CRIME =
+            "dushyant.android.criminalintent.result_crime";
+
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton;
@@ -43,6 +49,10 @@ public class CrimeFragment extends Fragment {
         CrimeFragment fragment = new CrimeFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public static int getResult(Intent data) {
+        return data.getIntExtra(RESULT_CRIME, 0);
     }
 
     @Override
@@ -68,6 +78,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mCrime.setTitle(s.toString());
+                setResult();
             }
 
             @Override
@@ -86,10 +97,25 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
+                setResult();
             }
         });
 
         return v;
     }
 
+    public void setResult() {
+        Intent i = new Intent();
+        i.putExtra(RESULT_CRIME, getPosition());
+        getActivity().setResult(Activity.RESULT_OK, i);
+    }
+
+    private int getPosition() {
+        List<Crime> crimes = CrimeLab.get(getActivity()).getCrimes();
+        for (int i = 0; i < crimes.size(); i++) {
+            if (crimes.get(i).getId().equals(mCrime.getId()))
+                return i;
+        }
+        return -1;
+    }
 }
