@@ -13,4 +13,6 @@
     <string name="hide_subtitle">Hide Subtitle</string>
     <string name="subtitle_format">%1$s crimes</string>
 
+    <string name="no_crimes">There are no crimes to show, Please add a Crime.</string>
+
 </resources>
