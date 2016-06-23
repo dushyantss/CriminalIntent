@@ -1,6 +1,7 @@
 package dushyant.android.criminalintent;
 
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -47,6 +49,7 @@ public class CrimeFragment extends Fragment {
     private CheckBox mSolvedCheckBox;
     private Button mReportButton;
     private Button mSuspectButton;
+    private Button mDialButton;
 
     public static CrimeFragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
@@ -142,6 +145,15 @@ public class CrimeFragment extends Fragment {
             mSuspectButton.setEnabled(false);
         }
 
+        mDialButton = (Button) v.findViewById(R.id.crime_dial);
+        mDialButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+                        REQUEST_CONTACT);
+            }
+        });
+
         return v;
     }
 
@@ -215,5 +227,30 @@ public class CrimeFragment extends Fragment {
                 mCrime.getTitle(), dateString, solvedString, suspect);
 
         return report;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CONTACT && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Cursor c = getActivity().getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " = ?",
+                    new String[]{mCrime.getSuspect()},
+                    null
+            );
+
+            try {
+                if (c.getCount() > 0) {
+                    c.moveToFirst();
+                    String tel = "tel:" + c.getString(0);
+                    Uri number = Uri.parse(tel);
+                    Intent i = new Intent(Intent.ACTION_DIAL, number);
+                    startActivity(i);
+                }
+            } finally {
+                c.close();
+            }
+        }
     }
 }
