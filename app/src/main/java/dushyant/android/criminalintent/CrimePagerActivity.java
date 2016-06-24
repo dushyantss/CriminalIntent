@@ -15,7 +15,8 @@ import java.util.UUID;
 import dushyant.android.criminalintent.models.Crime;
 import dushyant.android.criminalintent.models.CrimeLab;
 
-public class CrimePagerActivity extends AppCompatActivity {
+public class CrimePagerActivity extends AppCompatActivity
+        implements CrimeFragment.Callbacks {
 
     private static final String EXTRA_CRIME_ID =
             "dushyant.android.criminalintent.crime_id";
@@ -57,5 +58,10 @@ public class CrimePagerActivity extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+
     }
 }
